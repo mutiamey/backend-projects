@@ -1,0 +1,12 @@
+# Local data files
+tasks.json
+
+# Executable binaries
+*.exe
+task-cli
+github-activity
+
+# Editor
+.vscode/
+.idea/
+.DS_Store

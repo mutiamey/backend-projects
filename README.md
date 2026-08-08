@@ -9,6 +9,10 @@ A collection of backend practice projects built with **Go**, based on challenges
 | 1 | **Task Tracker** | A CLI application to track and manage tasks (CRUD) using local JSON storage. | [`/task-tracker`](./task-tracker) |
 | 2 | **GitHub User Activity** | A CLI application to fetch recent GitHub user activity via the GitHub REST API. | [`/github-user-activity`](./github-user-activity) |
 
+## Beginner Project
+1. https://roadmap.sh/projects/task-tracker
+2. https://roadmap.sh/projects/github-user-activity
+
 ## Getting Started
 
 To run any project, navigate into its corresponding directory:

@@ -6,7 +6,8 @@ expenses.json
 *.exe
 task-cli
 github-activity
-expense-tracker
+expense-tracker.exe
+unit-converter.exe
 
 # Editor
 .vscode/

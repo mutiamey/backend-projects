@@ -2,305 +2,217 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 )
 
-// Constants for task status and default storage filename
-const (
-	StatusTodo       = "todo"
-	StatusInProgress = "in-progress"
-	StatusDone       = "done"
-	FileName         = "tasks.json"
-)
-
-// Task represents the data structure for a single task item
-type Task struct {
-	ID          int       `json:"id"`
-	Description string    `json:"description"`
-	Status      string    `json:"status"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+type Expense struct {
+	ID          int     `json:"id"`
+	Date        string  `json:"date"`
+	Description string  `json:"description"`
+	Amount      float64 `json:"amount"`
 }
 
-func main() {
-	// Parse CLI arguments (os.Args[0] is the program name)
-	args := os.Args[1:]
+const fileName = "expenses.json"
 
-	if len(args) < 1 {
+func main() {
+	if len(os.Args) < 2 {
 		printUsage()
 		return
 	}
 
-	command := args[0]
+	command := os.Args[1]
 
 	switch command {
 	case "add":
-		if len(args) < 2 {
-			fmt.Println("Error: Missing task description. Usage: task-cli add \"Buy groceries\"")
-			return
-		}
-		addTask(args[1])
-
+		handleAdd()
 	case "update":
-		if len(args) < 3 {
-			fmt.Println("Error: Missing arguments. Usage: task-cli update <id> \"New description\"")
-			return
-		}
-		id, err := strconv.Atoi(args[1])
-		if err != nil {
-			fmt.Println("Error: Task ID must be a valid integer")
-			return
-		}
-		updateTask(id, args[2])
-
-	case "delete":
-		if len(args) < 2 {
-			fmt.Println("Error: Missing task ID. Usage: task-cli delete <id>")
-			return
-		}
-		id, err := strconv.Atoi(args[1])
-		if err != nil {
-			fmt.Println("Error: Task ID must be a valid integer")
-			return
-		}
-		deleteTask(id)
-
-	case "mark-in-progress":
-		if len(args) < 2 {
-			fmt.Println("Error: Missing task ID. Usage: task-cli mark-in-progress <id>")
-			return
-		}
-		id, err := strconv.Atoi(args[1])
-		if err != nil {
-			fmt.Println("Error: Task ID must be a valid integer")
-			return
-		}
-		updateTaskStatus(id, StatusInProgress)
-
-	case "mark-done":
-		if len(args) < 2 {
-			fmt.Println("Error: Missing task ID. Usage: task-cli mark-done <id>")
-			return
-		}
-		id, err := strconv.Atoi(args[1])
-		if err != nil {
-			fmt.Println("Error: Task ID must be a valid integer")
-			return
-		}
-		updateTaskStatus(id, StatusDone)
-
+		handleUpdate()
 	case "list":
-		filterStatus := ""
-		if len(args) >= 2 {
-			filterStatus = args[1]
-		}
-		listTasks(filterStatus)
-
+		handleList()
+	case "delete":
+		handleDelete()
+	case "summary":
+		handleSummary()
 	default:
-		fmt.Printf("Unknown command: %s\n\n", command)
+		fmt.Printf("Unknown command: %s\n", command)
 		printUsage()
-	}
-}
-
-// FILE HELPER FUNCTIONS
-
-// loadTasks reads the tasks.json file. Returns an empty slice if the file does not exist.
-func loadTasks() ([]Task, error) {
-	if _, err := os.Stat(FileName); os.IsNotExist(err) {
-		return []Task{}, nil
-	}
-
-	data, err := os.ReadFile(FileName)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(data) == 0 {
-		return []Task{}, nil
-	}
-
-	var tasks []Task
-	err = json.Unmarshal(data, &tasks)
-	if err != nil {
-		return nil, err
-	}
-
-	return tasks, nil
-}
-
-// saveTasks writes the current slice of tasks to tasks.json formatted with indentation
-func saveTasks(tasks []Task) error {
-	data, err := json.MarshalIndent(tasks, "", "  ")
-	if err != nil {
-		return err
-	}
-
-	return os.WriteFile(FileName, data, 0644)
-}
-
-// TASK OPERATION FUNCTIONS
-
-func addTask(description string) {
-	tasks, err := loadTasks()
-	if err != nil {
-		fmt.Printf("Error reading tasks file: %v\n", err)
-		return
-	}
-
-	// Auto-increment ID implementation
-	newID := 1
-	if len(tasks) > 0 {
-		newID = tasks[len(tasks)-1].ID + 1
-	}
-
-	now := time.Now()
-	newTask := Task{
-		ID:          newID,
-		Description: description,
-		Status:      StatusTodo,
-		CreatedAt:   now,
-		UpdatedAt:   now,
-	}
-
-	tasks = append(tasks, newTask)
-	err = saveTasks(tasks)
-	if err != nil {
-		fmt.Printf("Error saving task: %v\n", err)
-		return
-	}
-
-	fmt.Printf("Task added successfully (ID: %d)\n", newID)
-}
-
-func updateTask(id int, newDescription string) {
-	tasks, err := loadTasks()
-	if err != nil {
-		fmt.Printf("Error reading tasks file: %v\n", err)
-		return
-	}
-
-	found := false
-	for i := range tasks {
-		if tasks[i].ID == id {
-			tasks[i].Description = newDescription
-			tasks[i].UpdatedAt = time.Now()
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		fmt.Printf("Error: Task with ID %d not found.\n", id)
-		return
-	}
-
-	if err := saveTasks(tasks); err != nil {
-		fmt.Printf("Error updating task: %v\n", err)
-		return
-	}
-
-	fmt.Printf("Task %d updated successfully\n", id)
-}
-
-func deleteTask(id int) {
-	tasks, err := loadTasks()
-	if err != nil {
-		fmt.Printf("Error reading tasks file: %v\n", err)
-		return
-	}
-
-	indexToDelete := -1
-	for i, t := range tasks {
-		if t.ID == id {
-			indexToDelete = i
-			break
-		}
-	}
-
-	if indexToDelete == -1 {
-		fmt.Printf("Error: Task with ID %d not found.\n", id)
-		return
-	}
-
-	// Remove element from slice
-	tasks = append(tasks[:indexToDelete], tasks[indexToDelete+1:]...)
-
-	if err := saveTasks(tasks); err != nil {
-		fmt.Printf("Error deleting task: %v\n", err)
-		return
-	}
-
-	fmt.Printf("Task %d deleted successfully\n", id)
-}
-
-func updateTaskStatus(id int, newStatus string) {
-	tasks, err := loadTasks()
-	if err != nil {
-		fmt.Printf("Error reading tasks file: %v\n", err)
-		return
-	}
-
-	found := false
-	for i := range tasks {
-		if tasks[i].ID == id {
-			tasks[i].Status = newStatus
-			tasks[i].UpdatedAt = time.Now()
-			found = true
-			break
-		}
-	}
-
-	if !found {
-		fmt.Printf("Error: Task with ID %d not found.\n", id)
-		return
-	}
-
-	if err := saveTasks(tasks); err != nil {
-		fmt.Printf("Error updating status: %v\n", err)
-		return
-	}
-
-	fmt.Printf("Task %d marked as %s\n", id, newStatus)
-}
-
-func listTasks(filterStatus string) {
-	tasks, err := loadTasks()
-	if err != nil {
-		fmt.Printf("Error reading tasks file: %v\n", err)
-		return
-	}
-
-	if len(tasks) == 0 {
-		fmt.Println("No tasks found.")
-		return
-	}
-
-	count := 0
-	fmt.Printf("%-4s | %-12s | %s\n", "ID", "Status", "Description")
-	fmt.Println("--------------------------------------------------")
-
-	for _, t := range tasks {
-		if filterStatus != "" && t.Status != filterStatus {
-			continue
-		}
-		fmt.Printf("%-4d | %-12s | %s\n", t.ID, t.Status, t.Description)
-		count++
-	}
-
-	if count == 0 {
-		fmt.Printf("No tasks found with status '%s'.\n", filterStatus)
 	}
 }
 
 func printUsage() {
 	fmt.Println("Usage:")
-	fmt.Println("  task-cli add \"<description>\"")
-	fmt.Println("  task-cli update <id> \"<description>\"")
-	fmt.Println("  task-cli delete <id>")
-	fmt.Println("  task-cli mark-in-progress <id>")
-	fmt.Println("  task-cli mark-done <id>")
-	fmt.Println("  task-cli list [done|todo|in-progress]")
+	fmt.Println("  expense-tracker add --description \"Lunch\" --amount 20")
+	fmt.Println("  expense-tracker update --id 1 --description \"Lunch Box\" --amount 25")
+	fmt.Println("  expense-tracker list")
+	fmt.Println("  expense-tracker delete --id 1")
+	fmt.Println("  expense-tracker summary [--month 8]")
+}
+
+func handleAdd() {
+	addCmd := flag.NewFlagSet("add", flag.ExitOnError)
+	desc := addCmd.String("description", "", "Expense description")
+	amount := addCmd.Float64("amount", 0, "Expense amount")
+	addCmd.Parse(os.Args[2:])
+
+	if *desc == "" || *amount <= 0 {
+		fmt.Println("Error: --description and a positive --amount are required.")
+		return
+	}
+
+	expenses := loadExpenses()
+	newID := 1
+	if len(expenses) > 0 {
+		newID = expenses[len(expenses)-1].ID + 1
+	}
+
+	expense := Expense{
+		ID:          newID,
+		Date:        time.Now().Format("2006-01-02"),
+		Description: *desc,
+		Amount:      *amount,
+	}
+
+	expenses = append(expenses, expense)
+	saveExpenses(expenses)
+
+	fmt.Printf("# Expense added successfully (ID: %d)\n", newID)
+}
+
+func handleUpdate() {
+	updateCmd := flag.NewFlagSet("update", flag.ExitOnError)
+	id := updateCmd.Int("id", 0, "Expense ID to update")
+	desc := updateCmd.String("description", "", "New expense description")
+	amount := updateCmd.Float64("amount", 0, "New expense amount")
+	updateCmd.Parse(os.Args[2:])
+
+	if *id <= 0 {
+		fmt.Println("Error: Please provide a valid --id.")
+		return
+	}
+
+	expenses := loadExpenses()
+	found := false
+
+	for i, e := range expenses {
+		if e.ID == *id {
+			found = true
+			if *desc != "" {
+				expenses[i].Description = *desc
+			}
+			if *amount > 0 {
+				expenses[i].Amount = *amount
+			}
+			break
+		}
+	}
+
+	if !found {
+		fmt.Printf("Error: Expense with ID %d not found.\n", *id)
+		return
+	}
+
+	saveExpenses(expenses)
+	fmt.Println("# Expense updated successfully")
+}
+
+func handleList() {
+	expenses := loadExpenses()
+	if len(expenses) == 0 {
+		fmt.Println("No expenses recorded yet.")
+		return
+	}
+
+	fmt.Printf("# %-4s %-12s %-15s %-10s\n", "ID", "Date", "Description", "Amount")
+	for _, e := range expenses {
+		fmt.Printf("# %-4d %-12s %-15s $%.0f\n", e.ID, e.Date, e.Description, e.Amount)
+	}
+}
+
+func handleDelete() {
+	deleteCmd := flag.NewFlagSet("delete", flag.ExitOnError)
+	id := deleteCmd.Int("id", 0, "Expense ID to delete")
+	deleteCmd.Parse(os.Args[2:])
+
+	if *id <= 0 {
+		fmt.Println("Error: Please provide a valid --id.")
+		return
+	}
+
+	expenses := loadExpenses()
+	updatedExpenses := []Expense{}
+	found := false
+
+	for _, e := range expenses {
+		if e.ID == *id {
+			found = true
+			continue
+		}
+		updatedExpenses = append(updatedExpenses, e)
+	}
+
+	if !found {
+		fmt.Printf("Error: Expense with ID %d not found.\n", *id)
+		return
+	}
+
+	saveExpenses(updatedExpenses)
+	fmt.Println("# Expense deleted successfully")
+}
+
+func handleSummary() {
+	summaryCmd := flag.NewFlagSet("summary", flag.ExitOnError)
+	month := summaryCmd.Int("month", 0, "Filter summary by month (1-12)")
+	summaryCmd.Parse(os.Args[2:])
+
+	expenses := loadExpenses()
+	var total float64
+
+	if *month > 0 {
+		if *month < 1 || *month > 12 {
+			fmt.Println("Error: Month must be between 1 and 12.")
+			return
+		}
+
+		for _, e := range expenses {
+			t, err := time.Parse("2006-01-02", e.Date)
+			if err == nil && int(t.Month()) == *month && t.Year() == time.Now().Year() {
+				total += e.Amount
+			}
+		}
+
+		monthName := time.Month(*month).String()
+		fmt.Printf("# Total expenses for %s: $%.0f\n", monthName, total)
+	} else {
+		for _, e := range expenses {
+			total += e.Amount
+		}
+		fmt.Printf("# Total expenses: $%.0f\n", total)
+	}
+}
+
+func loadExpenses() []Expense {
+	if _, err := os.Stat(fileName); os.IsNotExist(err) {
+		return []Expense{}
+	}
+
+	data, err := os.ReadFile(fileName)
+	if err != nil {
+		return []Expense{}
+	}
+
+	var expenses []Expense
+	json.Unmarshal(data, &expenses)
+	return expenses
+}
+
+func saveExpenses(expenses []Expense) {
+	data, err := json.MarshalIndent(expenses, "", "  ")
+	if err != nil {
+		fmt.Printf("Error saving expenses: %v\n", err)
+		return
+	}
+	os.WriteFile(fileName, data, 0644)
 }

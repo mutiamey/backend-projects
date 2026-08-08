@@ -18,4 +18,5 @@ This project is built to complete the **[Unit Converter Challenge](https://roadm
 Navigate into this folder and run:
 ```bash
 go run main.go
+# open localhost in your browser
 ```

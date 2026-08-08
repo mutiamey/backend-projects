@@ -2,7 +2,7 @@
 
 A lightweight Command Line Interface (CLI) application written in Go to track and manage your daily tasks.
 
-This project is built to complete the **https://roadmap.sh/projects/task-tracker** from **roadmap.sh**.
+This project is built to complete the **[Task Tracker](https://roadmap.sh/projects/task-tracker)** from **roadmap.sh**.
 
 ## Features
 

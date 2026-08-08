@@ -16,10 +16,6 @@ A collection of backend practice projects built with **Go**, based on challenges
 2. [GitHub User Activity](https://roadmap.sh/projects/github-user-activity)
 3. [Expense Tracker](https://roadmap.sh/projects/expense-tracker)
 
-## Beginner Project
-1. https://roadmap.sh/projects/task-tracker
-2. https://roadmap.sh/projects/github-user-activity
-
 ## Getting Started
 
 To run any project, navigate into its corresponding directory:

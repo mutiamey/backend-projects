@@ -1,10 +1,12 @@
 # Local data files
 tasks.json
+expenses.json
 
 # Executable binaries
 *.exe
 task-cli
 github-activity
+expense-tracker
 
 # Editor
 .vscode/

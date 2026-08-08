@@ -4,10 +4,17 @@ A collection of backend practice projects built with **Go**, based on challenges
 
 ## Project List
 
-| No | Project Name | Description | Folder Link |
-|---|---|---|---|
-| 1 | **Task Tracker** | A CLI application to track and manage tasks (CRUD) using local JSON storage. | [`/task-tracker`](./task-tracker) |
-| 2 | **GitHub User Activity** | A CLI application to fetch recent GitHub user activity via the GitHub REST API. | [`/github-user-activity`](./github-user-activity) |
+| No | Project Name | Folder Link |
+|---|---|---|
+| 1 | **Task Tracker** | [`/task-tracker`](./task-tracker) |
+| 2 | **GitHub User Activity** | [`/github-user-activity`](./github-user-activity) |
+| 3 | **Expense Tracker** | [`/expense-tracker`](./expense-tracker/) |
+
+## Beginner Project
+
+1. [Task Tracker](https://roadmap.sh/projects/task-tracker)
+2. [GitHub User Activity](https://roadmap.sh/projects/github-user-activity)
+3. [Expense Tracker](https://roadmap.sh/projects/expense-tracker)
 
 ## Beginner Project
 1. https://roadmap.sh/projects/task-tracker

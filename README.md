@@ -1,6 +1,6 @@
 # Backend Projects
 
-A collection of backend practice projects built with **Go**, based on challenges from [roadmap.sh/projects](https://roadmap.sh/projects).
+A collection of backend practice projects built with **Go**, based on challenges from [Backend Projects](https://roadmap.sh/backend/projects).
 
 ## Project List
 

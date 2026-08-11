@@ -1,6 +1,7 @@
 # Local data files
 tasks.json
 expenses.json
+personal-blog/articles/*.json
 
 # Executable binaries
 *.exe
@@ -8,6 +9,7 @@ task-cli
 github-activity
 expense-tracker.exe
 unit-converter.exe
+personal-blog.exe
 
 # Editor
 .vscode/
